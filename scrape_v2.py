@@ -9,7 +9,6 @@ class Game:
         self.h_score = h_team_score
         self.a_score = a_team_score
 
-
     def get_winner(self):
         return (self.home if self.h_score > self.a_score else self.away)
 
