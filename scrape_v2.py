@@ -44,7 +44,7 @@ def scrape_season(url):
             home_team = cells[1].find_all('li')[2].text
             away_team = cells[1].find_all('li')[1].text
 
-		# determine the home and away team scores
+        # determine the home and away team scores
         score = cells[2].a.text.split(' ')[0].split('-')
         home_team_score = 0;
         away_team_score = 0;
