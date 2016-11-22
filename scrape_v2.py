@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup as bsoup
 import requests
 
 
-class Game:
+"""class Game:
     def __init__(self, h_team, a_team, h_team_score, a_team_score):
         self.home = h_team
         self.away = a_team
@@ -10,8 +10,41 @@ class Game:
         self.a_score = a_team_score
 
     def get_winner(self):
-        return (self.home if self.h_score > self.a_score else self.away)
+       return (self.home if self.h_score > self.a_score else self.away)"""
 
+# Team abbreviations to help with url building
+TEAMS = {
+    'Anaheim'      : 'ana',
+    'Arizona'      : 'ari',
+    'Boston'       : 'bos',
+    'Buffalo'      : 'buf',
+    'Calgary'      : 'cgy',
+    'Carolina'     : 'car',
+    'Chicago'      : 'chi',
+    'Colorado'     : 'col',
+    'Columbus'     : 'cbj',
+    'Dallas'       : 'dal',
+    'Detroit'      : 'det',
+    'Edmonton'     : 'edm',
+    'Florida'      : 'fla',
+    'Los Angeles'  : 'la',
+    'Minnesota'    : 'min',
+    'Montreal'     : 'mtl',
+    'Nashville'    : 'nsh',
+    'New Jersey'   : 'nj',
+    'NY Islanders' : 'nyi',
+    'NY Rangers'   : 'nyr',
+    'Ottawa'       : 'ott',
+    'Philadelphia' : 'phi',
+    'Pittsburgh'   : 'pit',
+    'San Jose'     : 'sj',
+    'St. Louis'    : 'stl',
+    'Tampa Bay'    : 'tb',
+    'Toronto'      : 'tor',
+    'Vancouver'    : 'van',
+    'Washington'   : 'wsh',
+    'Winnipeg'     : 'wpg'
+}
 
 def scrape_season(url, team_name):
     
@@ -67,7 +100,7 @@ def scrape_season(url, team_name):
             home_team_score = int(score[1])
             away_team_score = int(score[0])
 
-        game_list.append(Game(home_team, away_team, home_team_score, away_team_score))
+        game_list.append([home_team, away_team, home_team_score, away_team_score])
 
     return game_list
 
@@ -75,12 +108,21 @@ def scrape_season(url, team_name):
 def main():
     
     # get the initial url
-    url = 'http://www.espn.com/nhl/team/schedule/_/name/pit/year/2008'
+    #url = 'http://www.espn.com/nhl/team/schedule/_/name/pit/year/2008'
+    print("Below is a list of valid NHL teams: ")
+    for key, value in TEAMS.items():
+        print("%s" % key)
+    print("----------------------------------------------")
+
+    team = input("Please enter a team name from above: ")
+    year = input("Please enter a year: ")
+    url = 'http://www.espn.com/nhl/team/schedule/_/name/' + TEAMS[team] + '/year/' + year
     
     # scrape all games of a particular season for a team
-    game_list = scrape_season(url, 'Pittsburgh')
+    game_list = scrape_season(url, team)
+
     for game in game_list:
-        print("%s" % (game.get_winner()))
+        print(game)
 
 
 if __name__ == '__main__':
