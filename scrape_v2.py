@@ -2,16 +2,6 @@ from bs4 import BeautifulSoup as bsoup
 import requests
 
 
-"""class Game:
-    def __init__(self, h_team, a_team, h_team_score, a_team_score):
-        self.home = h_team
-        self.away = a_team
-        self.h_score = h_team_score
-        self.a_score = a_team_score
-
-    def get_winner(self):
-       return (self.home if self.h_score > self.a_score else self.away)"""
-
 # Team abbreviations to help with url building
 TEAMS = {
     'Anaheim'      : 'ana',
@@ -68,6 +58,9 @@ def scrape_season(url, team_name):
         # get the individual cells
         cells = row.find_all('td')
 
+        # get the date of the event
+        game_date = cells[0].text
+
         # determine the home and away teams
         home_team = ''
         away_team = ''
@@ -84,7 +77,11 @@ def scrape_season(url, team_name):
             continue
 
         # determine the home and away team scores
-        score = cells[2].a.text.split(' ')[0].split('-')
+        try:
+            score = cells[2].a.text.split(' ')[0].split('-')
+        except AttributeError:
+            continue
+
         home_team_score = 0;
         away_team_score = 0;
         if cells[2].find_all('li')[0].span.text == 'L' and home_team == team_name:
@@ -100,29 +97,52 @@ def scrape_season(url, team_name):
             home_team_score = int(score[1])
             away_team_score = int(score[0])
 
-        game_list.append([home_team, away_team, home_team_score, away_team_score])
+        # determine shots for and against
+        try:
+            shots = cells[6].text.split(' ').split('-')
+            shots_for = shots[0]
+            shots_against = shots[1]
+        except AttributeError:
+            continue
+
+        # determine powerplay success and attempts
+        try:
+            powerplay = cells[7].text.split(' ').split('-')
+            powerplay_success = powerplay[0]
+            powerplay_attempts = powerplay[1]
+        except AttributeError:
+            continue
+
+        # determine penalty kill success and attempts
+        try:
+            penalty_kill = cells[8].text.split(' ').split('-')
+            penalty_kill_success = penalty_kill[0]
+            penalty_kill_attempts = penalty_kill[1]
+        except AttributeError:
+            continue
+
+        game_list.append([
+            game_date, home_team, away_team, 
+            home_team_score, away_team_score,
+            shots_for, shots_against, powerplay_success,
+            powerplay_attempts, penalty_kill_success,
+            penalty_kill_attempts
+        ])
 
     return game_list
 
 
 def main():
     
-    # get the initial url
-    #url = 'http://www.espn.com/nhl/team/schedule/_/name/pit/year/2008'
-    print("Below is a list of valid NHL teams: ")
-    for key, value in TEAMS.items():
-        print("%s" % key)
-    print("----------------------------------------------")
-
-    team = input("Please enter a team name from above: ")
+    sorted_teams = sorted(TEAMS.items())
     year = input("Please enter a year: ")
-    url = 'http://www.espn.com/nhl/team/schedule/_/name/' + TEAMS[team] + '/year/' + year
-    
-    # scrape all games of a particular season for a team
-    game_list = scrape_season(url, team)
+    for team in sorted_teams:
+        url = 'http://www.espn.com/nhl/team/schedule/_/name/' + team[1] + '/year/' + year
+        # scrape all games of a particular season for a team
+        game_list = scrape_season(url, team[0])
 
-    for game in game_list:
-        print(game)
+        for game in game_list:
+            print(game)
 
 
 if __name__ == '__main__':
