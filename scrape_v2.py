@@ -57,6 +57,8 @@ def scrape_season(url, team_name):
 
         # get the individual cells
         cells = row.find_all('td')
+        if len(cells) != 9:
+            continue
 
         # get the date of the event
         game_date = cells[0].text
@@ -67,12 +69,19 @@ def scrape_season(url, team_name):
 		
         # ignore games against teams that no longer exist
         try:
-            if cells[1].find_all('li')[0].text == 'vs':
-                away_team = cells[1].find_all('li')[2].text
+            lis = cells[1].find_all('li')
+            if lis[0].text == 'vs' and len(lis) == 3:
+                away_team = lis[2].text
                 home_team = team_name 
-            else:
-                home_team = cells[1].find_all('li')[2].text
+            elif lis[0].text == '@' and len(lis) == 3:
+                home_team = lis[2].text
                 away_team = team_name
+            elif lis[0].text == 'vs' and len(lis) == 2:
+                home_team = team_name
+                away_team = lis[1].text
+            elif lis[0].text == '@' and len(lis) == 2:
+                home_team = lis[1].text
+                away_team = team_name 
         except IndexError:
             continue
 
@@ -99,7 +108,7 @@ def scrape_season(url, team_name):
 
         # determine shots for and against
         try:
-            shots = cells[6].text.split(' ').split('-')
+            shots = cells[6].text.split('-')
             shots_for = shots[0]
             shots_against = shots[1]
         except AttributeError:
@@ -107,7 +116,7 @@ def scrape_season(url, team_name):
 
         # determine powerplay success and attempts
         try:
-            powerplay = cells[7].text.split(' ').split('-')
+            powerplay = cells[7].text.split('-')
             powerplay_success = powerplay[0]
             powerplay_attempts = powerplay[1]
         except AttributeError:
@@ -115,7 +124,7 @@ def scrape_season(url, team_name):
 
         # determine penalty kill success and attempts
         try:
-            penalty_kill = cells[8].text.split(' ').split('-')
+            penalty_kill = cells[8].text.split('-')
             penalty_kill_success = penalty_kill[0]
             penalty_kill_attempts = penalty_kill[1]
         except AttributeError:
@@ -132,17 +141,35 @@ def scrape_season(url, team_name):
     return game_list
 
 
+def compare(x, y):
+    if x[0] == y[0] and x[1] == y[1] and x[2] == y[2]:
+        return True
+    else:
+        return False
+
+
 def main():
     
     sorted_teams = sorted(TEAMS.items())
     year = input("Please enter a year: ")
+    season = list()
     for team in sorted_teams:
         url = 'http://www.espn.com/nhl/team/schedule/_/name/' + team[1] + '/year/' + year
         # scrape all games of a particular season for a team
         game_list = scrape_season(url, team[0])
+        season.append(game_list)
+    
+    compressed_season = [game for x in season for game in x]
+    print(len(compressed_season))
+    final_season = list()
+    for i in range(len(compressed_season)):
+        for j in range(i + 1, len(compressed_season)):
+            flag = compare(compressed_season[i], compressed_season[j])
+            if flag:
+                final_season.append(compressed_season[i])
+                break
 
-        for game in game_list:
-            print(game)
+    print(len(final_season))
 
 
 if __name__ == '__main__':
