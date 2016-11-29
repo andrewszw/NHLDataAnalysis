@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup as bsoup
 import requests
+import csv
 
 
 # Team abbreviations to help with url building
@@ -35,6 +36,7 @@ TEAMS = {
     'Washington'   : 'wsh',
     'Winnipeg'     : 'wpg'
 }
+
 
 def scrape_season(url, team_name):
     
@@ -148,6 +150,13 @@ def compare(x, y):
         return False
 
 
+def write_to_csv(data, year):
+    with open(year + '.csv', 'w') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=',')
+        for x in data:
+            csvwriter.writerow(x)
+
+
 def main():
     
     sorted_teams = sorted(TEAMS.items())
@@ -169,7 +178,7 @@ def main():
                 final_season.append(compressed_season[i])
                 break
 
-    print(len(final_season))
+    write_to_csv(final_season, year)
 
 
 if __name__ == '__main__':
