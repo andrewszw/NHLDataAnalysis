@@ -150,8 +150,8 @@ def compare(x, y):
         return False
 
 
-def write_to_csv(data, year):
-    with open(year + '.csv', 'w') as csvfile:
+def write_to_csv(data):
+    with open('data.csv', 'a') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         for x in data:
             csvwriter.writerow(x)
@@ -177,7 +177,7 @@ def main():
                 final_season.append(compressed_season[i])
                 break"""
 
-    write_to_csv(compressed_season, year)
+    write_to_csv(compressed_season)
 
 
 if __name__ == '__main__':
