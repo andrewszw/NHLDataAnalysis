@@ -38,7 +38,7 @@ TEAMS = {
 }
 
 
-def scrape_season(url, team_name):
+def scrape_season(url, team_name, year):
     
     # get the soup
     r = requests.get(url).text
@@ -133,7 +133,7 @@ def scrape_season(url, team_name):
             continue
 
         game_list.append([
-            game_date, home_team, away_team, 
+            year, game_date, home_team, away_team, 
             home_team_score, away_team_score,
             shots_for, shots_against, powerplay_success,
             powerplay_attempts, penalty_kill_success,
@@ -165,20 +165,19 @@ def main():
     for team in sorted_teams:
         url = 'http://www.espn.com/nhl/team/schedule/_/name/' + team[1] + '/year/' + year
         # scrape all games of a particular season for a team
-        game_list = scrape_season(url, team[0])
+        game_list = scrape_season(url, team[0], year)
         season.append(game_list)
     
     compressed_season = [game for x in season for game in x]
-    print(len(compressed_season))
-    final_season = list()
+    """final_season = list()
     for i in range(len(compressed_season)):
         for j in range(i + 1, len(compressed_season)):
             flag = compare(compressed_season[i], compressed_season[j])
             if flag:
                 final_season.append(compressed_season[i])
-                break
+                break"""
 
-    write_to_csv(final_season, year)
+    write_to_csv(compressed_season, year)
 
 
 if __name__ == '__main__':
