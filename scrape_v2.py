@@ -177,7 +177,7 @@ def main():
                 final_season.append(compressed_season[i])
                 break"""
 
-    write_to_csv(compressed_season)
+    #write_to_csv(compressed_season)
 
 
 if __name__ == '__main__':
