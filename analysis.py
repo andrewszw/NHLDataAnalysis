@@ -81,6 +81,41 @@ def average_goals_for(db):
     print("Average Goals Per Game: %f" % (total_goals / total_games))
 
 
+def average_powerplay(db):
+    home_pp_win = 0
+    home_pp_loss = 0
+    away_pp_win = 0
+    away_pp_loss = 0
+    total_home_games = 0
+    total_away_games = 0
+    for item in db.hockey.find({'home': 1}):
+        if item['pp_attempt'] == 0:
+            continue
+        if item['goals_for'] > item['goals_against']:
+            home_pp_win += (item['pp_success'] / item['pp_attempt'])
+        elif item['goals_for'] < item['goals_against']:
+            home_pp_loss += (item['pp_success'] / item['pp_attempt'])
+        total_home_games += 1
+
+    for item in db.hockey.find({'home': 0}):
+        if item['pp_attempt'] == 0:
+            continue
+        if item['goals_for'] > item['goals_against']:
+            away_pp_win += (item['pp_success'] / item['pp_attempt'])
+        elif item['goals_for'] < item['goals_against']:
+            away_pp_loss += (item['pp_success'] / item['pp_attempt'])
+        total_away_games += 1
+
+    print("Average PowerPlay Conversion by Home Team in Win: %f" % (home_pp_win / (total_home_games / 2)))
+    print("Average PowerPlay Conversion by Home Team in Loss: %f" % (home_pp_loss / (total_home_games / 2)))
+    print("Average PowerPlay Conversion by Away Team in Win: %f" % (away_pp_win / (total_away_games / 2)))
+    print("Average PowerPlay Conversion by Away in Loss: %f" % (away_pp_loss / (total_away_games / 2)))
+
+    total_pp = (home_pp_win + home_pp_loss) + (away_pp_win + away_pp_loss)
+    total_games = total_home_games + total_away_games
+    print("Average PowerPlay Conversion Per Game: %f" % (total_pp / total_games))
+
+
 def main():
     client = pymongo.MongoClient("localhost", 27017)
 
@@ -88,7 +123,6 @@ def main():
 
     hteam_corr = team_correlation(db, 1)
     hteam_rounded = [['%.5f' % round(y, 5) for y in x] for x in hteam_corr]
-
     ateam_corr = team_correlation(db, 0)
     ateam_rounded = [['%.5f' % round(y, 5) for y in x] for x in ateam_corr]
 
@@ -96,6 +130,7 @@ def main():
     print()
     average_goals_for(db)
     print()
+    average_powerplay(db)
 
 
 if __name__ == '__main__':
